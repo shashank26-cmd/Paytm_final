@@ -4,9 +4,15 @@ const app = express();
 
 app.use(express.json())
 
+// we are not first fetching balance and then updating because if two parallel req comes then misBalance will Happen 
+// 0+300
+// 0+400
+// balannce=400 not 700
+
 app.post("/hdfcWebhook", async (req, res) => {
     //TODO: Add zod validation here?
     //TODO: HDFC bank should ideally send us a secret so we know this is sent by them
+    //TODO: check status processing then only increase amount...
     const paymentInformation: {
         token: string;
         userId: string;
@@ -18,14 +24,15 @@ app.post("/hdfcWebhook", async (req, res) => {
     };
 
     try {
-        await db.$transaction([
+        await db.$transaction([ // process both thing or nothing but not any one 
+
             db.balance.updateMany({
                 where: {
                     userId: Number(paymentInformation.userId)
                 },
                 data: {
                     amount: {
-                        // You can also get this from your DB
+                        // db will handle if req comes parallel
                         increment: Number(paymentInformation.amount)
                     }
                 }

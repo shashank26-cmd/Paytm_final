@@ -15,7 +15,7 @@ async function main() {
             amount: 20000,
             locked: 0
         }
-      },
+      }, 
       OnRampTransaction: {
         create: {
           startTime: new Date(),
