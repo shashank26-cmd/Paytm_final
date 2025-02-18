@@ -3,6 +3,7 @@
 import prisma from "@repo/db/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
+import { webhookMoney } from "./webhookMoney";
 
 export async function createOnRampTransaction(provider: string, amount: number) {
     // Ideally the token should come from the banking provider (hdfc/axis)
@@ -13,6 +14,7 @@ export async function createOnRampTransaction(provider: string, amount: number) 
         }
     }
     const token = (Math.random() * 1000).toString();
+
     await prisma.onRampTransaction.create({
         data: {
             provider,
@@ -23,6 +25,8 @@ export async function createOnRampTransaction(provider: string, amount: number) 
             amount: amount * 100
         }
     });
+    await webhookMoney(token,String(amount*100))
+
 
     return {
         message: "Done"
