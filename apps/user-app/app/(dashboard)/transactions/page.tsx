@@ -20,31 +20,42 @@ async function getBalance() {
 
 async function getOnRampTransactions() {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id ? Number(session.user.id) : null;
+
+    if (!userId) return []; // Handle missing user ID
+
     const txns = await prisma.onRampTransaction.findMany({
-        where: {
-            userId: Number(session?.user?.id)
-        }
+        where: { userId },
+        orderBy: { startTime: 'desc' },
+        take: 5
     });
+
     return txns.map(t => ({
         time: t.startTime,
         amount: t.amount,
         status: t.status,
         provider: t.provider
-    }))
+    }));
 }
 
 async function getP2PTransactions() {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id ? Number(session.user.id) : null;
+
+    if (!userId) return { sent: [], received: [] };
+
     const sentTxns = await prisma.p2pTransfer.findMany({
-        where: {
-            fromUserId: Number(session?.user?.id)
-        }
+        where: { fromUserId: userId },
+        orderBy: { timestamp: 'desc' },
+        take: 3
     });
+
     const receivedTxns = await prisma.p2pTransfer.findMany({
-        where: {
-            toUserId: Number(session?.user?.id)
-        }
+        where: { toUserId: userId },
+        orderBy: { timestamp: 'desc' },
+        take: 3
     });
+
     return {
         sent: sentTxns.map(t => ({
             time: t.timestamp,
@@ -58,7 +69,7 @@ async function getP2PTransactions() {
             txnType: "rec",
             party: Number(t.fromUserId)
         }))
-    }
+    };
 }
 
 export default async function() {
@@ -70,7 +81,7 @@ export default async function() {
     return <div className="w-full">
         <div className="w-fit">
             <Card title="Current Balance">
-                <div className="text-slate-600 text-4xl">₹{balance.amount / 100}</div>
+                <div className="text-slate-600  text-4xl">₹{balance.amount / 100}</div>
             </Card>
         </div>
         <div className="flex justify-evenly space-x-4">

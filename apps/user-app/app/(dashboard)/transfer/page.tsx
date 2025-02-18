@@ -28,7 +28,9 @@ async function getOnRampTransactions() {
     if (!userId) return []; // Handle missing user ID
 
     const txns = await prisma.onRampTransaction.findMany({
-        where: { userId }
+        where: { userId },
+        orderBy: { startTime: 'desc' },
+        take: 5
     });
 
     return txns.map(t => ({
@@ -38,6 +40,7 @@ async function getOnRampTransactions() {
         provider: t.provider
     }));
 }
+
 
 export default async function() {
     const balance = await getBalance();
