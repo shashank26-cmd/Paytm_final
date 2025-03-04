@@ -22,8 +22,9 @@
     "packages/*"
   ],
   "dependencies": {
-    "bcryptjs": "^3.0.2"
+    "@types/bs58": "^4.0.4",
+    "@types/jsonwebtoken": "^9.0.9",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5"
   }
 }
-
-
